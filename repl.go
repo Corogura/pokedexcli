@@ -26,9 +26,18 @@ func startRepl(cfg *config) {
 		cleanedInput := cleanInput(input)
 		c, exists := commands[cleanedInput[0]]
 		if exists {
-			err := c.callback(cfg)
-			if err != nil {
-				fmt.Println(err)
+			if len(cleanedInput) > 1 {
+				for i := range len(cleanedInput) - 1 {
+					err := c.callback(cfg, cleanedInput[i+1])
+					if err != nil {
+						fmt.Println(err)
+					}
+				}
+			} else {
+				err := c.callback(cfg)
+				if err != nil {
+					fmt.Println(err)
+				}
 			}
 		} else {
 			fmt.Println("Unknown command")
@@ -42,13 +51,13 @@ func cleanInput(text string) []string {
 	return slicedString
 }
 
-func commandExit(cfg *config) error {
+func commandExit(cfg *config, s ...string) error {
 	fmt.Println("Closing the Pokedex... Goodbye!")
 	os.Exit(0)
 	return nil
 }
 
-func commandHelp(cfg *config) error {
+func commandHelp(cfg *config, s ...string) error {
 	fmt.Println("Welcome to the Pokedex!")
 	fmt.Print("Usage:\n\n")
 	for _, elem := range getCommands() {
@@ -60,7 +69,7 @@ func commandHelp(cfg *config) error {
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(cfg *config) error
+	callback    func(cfg *config, arg ...string) error
 }
 
 func getCommands() map[string]cliCommand {
@@ -84,6 +93,11 @@ func getCommands() map[string]cliCommand {
 			name:        "mapb",
 			description: "Displays the previous 20 location areas that was displayed using map command",
 			callback:    commandMapb,
+		},
+		"explore": {
+			name:        "explore",
+			description: "Displays a list of all the Pokemon located in a specified area",
+			callback:    commandExplore,
 		},
 	}
 }
