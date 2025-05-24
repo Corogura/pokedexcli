@@ -27,3 +27,14 @@ func commandInspect(cfg *config, names ...string) error {
 	}
 	return nil
 }
+
+func commandPokedex(cfg *config, s ...string) error {
+	if cfg.pokedex == nil {
+		return fmt.Errorf("no Pokemon found in the Pokedex")
+	}
+	fmt.Println("Your Pokedex:")
+	for key, _ := range cfg.pokedex {
+		fmt.Printf(" - %s\n", key)
+	}
+	return nil
+}
