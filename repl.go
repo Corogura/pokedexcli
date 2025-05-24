@@ -5,15 +5,19 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/Corogura/pokedexcli/internal/pokeapi"
 )
 
-func startRepl() {
+type config struct {
+	pokeapiClient       pokeapi.Client
+	nextLocationURL     *string
+	previousLocationURL *string
+}
+
+func startRepl(cfg *config) {
 	scanner := bufio.NewScanner(os.Stdin)
 	commands := getCommands()
-	pageConfig := config{
-		Next:     "https://pokeapi.co/api/v2/location-area/1",
-		Previous: "",
-	}
 	for {
 		fmt.Print("Pokedex > ")
 		var input string
@@ -22,7 +26,7 @@ func startRepl() {
 		cleanedInput := cleanInput(input)
 		c, exists := commands[cleanedInput[0]]
 		if exists {
-			err := c.callback(&pageConfig)
+			err := c.callback(cfg)
 			if err != nil {
 				fmt.Println(err)
 			}
@@ -38,13 +42,13 @@ func cleanInput(text string) []string {
 	return slicedString
 }
 
-func commandExit(c *config) error {
+func commandExit(cfg *config) error {
 	fmt.Println("Closing the Pokedex... Goodbye!")
 	os.Exit(0)
 	return nil
 }
 
-func commandHelp(c *config) error {
+func commandHelp(cfg *config) error {
 	fmt.Println("Welcome to the Pokedex!")
 	fmt.Print("Usage:\n\n")
 	for _, elem := range getCommands() {
@@ -56,7 +60,7 @@ func commandHelp(c *config) error {
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(c *config) error
+	callback    func(cfg *config) error
 }
 
 func getCommands() map[string]cliCommand {
@@ -74,12 +78,12 @@ func getCommands() map[string]cliCommand {
 		"map": {
 			name:        "map",
 			description: "Displays 20 location areas in the Pokemon world. Each subsequent call displays the next 20 location areas.",
-			callback:    getLocation,
+			callback:    commandMapf,
 		},
 		"mapb": {
 			name:        "mapb",
 			description: "Displays the previous 20 location areas that was displayed using map command",
-			callback:    getLocationb,
+			callback:    commandMapb,
 		},
 	}
 }
