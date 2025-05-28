@@ -33,7 +33,7 @@ func commandPokedex(cfg *config, s ...string) error {
 		return fmt.Errorf("no Pokemon found in the Pokedex")
 	}
 	fmt.Println("Your Pokedex:")
-	for key, _ := range cfg.pokedex {
+	for key := range cfg.pokedex {
 		fmt.Printf(" - %s\n", key)
 	}
 	return nil
